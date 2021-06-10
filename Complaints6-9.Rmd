@@ -9,23 +9,32 @@ library(tidyverse)
 library(primer.data)
 library(ggplot2)
 library(plotly)
-x <- read_csv("https://raw.githubusercontent.com/Financial-Times/police-misconduct-complaints-analysis/main/output/philly_clean.csv") %>% select(officer_id, po_race, po_sex)
+raw_data <- read_csv("https://raw.githubusercontent.com/Financial-Times/police-misconduct-complaints-analysis/main/output/philly_clean.csv") %>% 
+  select(officer_id, po_race, po_sex)
 ```
 
 ```{r}
-x %>%
-  group_by(officer_id) %>%
-  summarize(total = n()) %>%
-  arrange(desc(total)) %>%
-  slice(1:10) %>%
-  mutate(officer_id_letters = as.character(officer_id)) %>%
-  ggplot(mapping = aes(x = officer_id_letters, y = total)) + 
-  geom_col(fill = "steelblue") +
-  labs(title = "Number of Complaints for 10 Officers",
-       subtitle = "Ten officers with most complaints",
-       x = "Officer IDs",
-       y = "Complaints",
-       caption = "Source: Financial Times") + 
-  theme_gray()
+raw_data %>% 
+  group_by(officer_id) %>% 
+  summarise(total = n()) %>% 
+  mutate(officer_id = as.character(officer_id)) %>%
+  mutate(compl_dec = ntile(x = total, 10)) %>%
+  group_by(compl_dec) %>%
+  summarize(compl_total = sum(total)) %>%
+  mutate(compl_percentage = compl_total/sum(compl_total)) %>%
+  ggplot(aes(x = compl_dec, y = compl_percentage)) +
+    geom_col(fill = "brown") + theme_gray() + 
+    scale_x_continuous(breaks = c(1:10)) + 
+    scale_y_continuous(labels = scales::percent_format()) +
+    labs(title = "Complaint numbers for each decile of officers",
+         subtitle = "Top 10% of Officers has a third of police complaints",
+         x = "Deciles of officers",
+         y = NULL,
+         caption = "Source: Financial Times")
+  
 ```
+
+
+
+
 
