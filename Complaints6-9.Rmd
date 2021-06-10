@@ -1,0 +1,31 @@
+---
+title: "Complaints6-9"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(primer.data)
+library(ggplot2)
+library(plotly)
+x <- read_csv("https://raw.githubusercontent.com/Financial-Times/police-misconduct-complaints-analysis/main/output/philly_clean.csv") %>% select(officer_id, po_race, po_sex)
+```
+
+```{r}
+x %>%
+  group_by(officer_id) %>%
+  summarize(total = n()) %>%
+  arrange(desc(total)) %>%
+  slice(1:10) %>%
+  mutate(officer_id_letters = as.character(officer_id)) %>%
+  ggplot(mapping = aes(x = officer_id_letters, y = total)) + 
+  geom_col(fill = "steelblue") +
+  labs(title = "Number of Complaints for 10 Officers",
+       subtitle = "Ten officers with most complaints",
+       x = "Officer IDs",
+       y = "Complaints",
+       caption = "Source: Financial Times") + 
+  theme_gray()
+```
+
